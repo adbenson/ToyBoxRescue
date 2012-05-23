@@ -1,5 +1,6 @@
 package net.adbenson.toybox;
 
+import static net.adbenson.toybox.ToyRescue.State.*;
 
 import java.awt.Color;
 import java.awt.Cursor;
@@ -20,22 +21,25 @@ import java.awt.event.MouseMotionAdapter;
 import java.awt.geom.Area;
 import java.awt.geom.GeneralPath;
 import java.awt.image.BufferedImage;
+import java.util.LinkedList;
+import java.util.Random;
 
 import javax.swing.JFrame;
 
-public class ToyBox {
+public class ToyRescue {
 	
 	public static void main(String[] args) {
-		new ToyBox();
+		new ToyRescue();
 	}
 	
-	private enum state {
+	public enum State {
 		START,
-		RUN,
-		PULLING,
-		
+		DROPPED,
+		GRABBED,
 		GAMEOVER
 	}
+	
+	private State state;
 		
 	private Window window;
 	
@@ -43,18 +47,29 @@ public class ToyBox {
 	
 	private Vector mousePos;
 	
-	private Toy toy;
+	private Boat toy;
 	
 	private Handle handle;
 	
-	boolean started;
+	private LinkedList<Person> survivors;
+	private LinkedList<Person> floating;
 	
-	public ToyBox() {
+	
+	public ToyRescue() {
+		state = START;
 		
 		window = new Window();
-		toy = new Toy(400, 300);
+		toy = new Boat(400, 300);
 		painter = new Painter();
-		mousePos = new Vector(0, 0);
+		survivors = new LinkedList<Person>();
+		floating = new LinkedList<Person>();
+		Random r = new Random(System.currentTimeMillis());
+		for(int i=0; i < 10; i++) {
+			Vector location = new Vector(r.nextInt(760)+20, r.nextInt(540)+40);
+			Person p = new Person(Color.getHSBColor(r.nextFloat(), 1.0f, 1.0f), location, (r.nextDouble()*0.25)+0.25);
+			survivors.add(p);
+			floating.add(p);
+		}
 		
 		window.setPreferredSize(new Dimension(800, 600));
 		
@@ -62,7 +77,9 @@ public class ToyBox {
 		
 		window.addMouseMotionListener(new MouseMotionAdapter() {
 			public void mouseDragged(MouseEvent mouse) {
-				mousePos = new Vector(mouse.getX(), mouse.getY());
+				if (state == GRABBED) {
+					handle.setLocation(mouse.getPoint());
+				}
 			}
 		});
 		
@@ -84,16 +101,22 @@ public class ToyBox {
 	}
 	
 	private void mouseDown(MouseEvent mouse) {
-		window.showCursor(false);
+		if ((state == START || state == DROPPED) && handle.contains(mouse.getPoint())) {
+			state = GRABBED;
+			window.showCursor(false);
+		}
 	}
 	
 	private void mouseUp(MouseEvent mouse) {
 		window.showCursor(true);
+		if (state == GRABBED) {
+			state = DROPPED;
+		}
 	}
 	
 	class Window extends JFrame {
 		
-		private Shape wall;
+		private Area wall;
 		
 		public static final int WALL_WIDTH = 20;
 		public static final int MENU_HEIGHT = 20;
@@ -126,7 +149,7 @@ public class ToyBox {
 			}
 		}
 		
-		protected Shape generateWall() {
+		protected Area generateWall() {
 			GeneralPath wall = new GeneralPath();
 			int width = this.getWidth();
 			int height = this.getHeight();
@@ -141,7 +164,7 @@ public class ToyBox {
 			wall.lineTo(ww, wm);
 			wall.closePath();
 			
-			return wall;
+			return new Area(wall);
 		}
 		
 		public Shape getWall() {
@@ -166,29 +189,48 @@ public class ToyBox {
 
 	        toy.draw(g2);
 	       
-	        g2.setColor(Color.orange);
-	        g2.fillOval(mousePos.intX()-20, mousePos.intY()-20, 40, 40);
-
+	        handle.draw(g2);
+	        
+	        for(Person p : floating) {
+	        	p.draw(g2);
+	        }
+	        
+	        new Person(Color.green, handle, 0.3).draw(g2);
+	        
 	        g.drawImage(offscreen, 0, 0, this);
 		}
 
 	}
 		
 	protected void tick() {
-		toy.pull(handle);
-		toy.move();
-		detectCollisions();
+		if (state == DROPPED || state == GRABBED) {
+			toy.pull(handle);
+			toy.move();
+			detectCollisions();
+		}
 	}
 		
 	private void detectCollisions() {
-		Rectangle toyBounds = toy.getBounds();
-		
-		Area wallArea = new Area(window.getWall());
-		if (! wallArea.contains(toyBounds)) { 
-			System.out.println("Breaking wall");
-			toy.crash();
+		if (state != START && state != GAMEOVER){ 
+			Rectangle toyBounds = toy.getBounds();
+			
+			boolean wallCrash = ! window.getWall().contains(toyBounds);
+			boolean handleCrash = false;//handle.contains(toy.getShape());
+			if (wallCrash || handleCrash) { 
+				System.out.println("Crash: wall?"+wallCrash+" handle?"+handleCrash);
+				toy.crash();
+				state = GAMEOVER;
+			}
+			
+			LinkedList<Person> pickedUp = new LinkedList<Person>();
+			for(Person p : floating) {
+				if (toy.intersects(p)) {
+					toy.pickup(p);
+					pickedUp.add(p);
+				}
+			}
+			floating.removeAll(pickedUp);
 		}
-		
 		
 	}
 

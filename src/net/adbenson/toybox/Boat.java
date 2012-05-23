@@ -10,9 +10,12 @@ import java.awt.Shape;
 import java.awt.Stroke;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.GeneralPath;
+import java.awt.geom.Path2D;
+import java.util.Collections;
+import java.util.LinkedList;
 
 
-public class Toy{
+public class Boat{
 		
 	private static final double FRICTION = 0.95;
 	private static final double TURN_RADIUS = 0.5;
@@ -23,7 +26,7 @@ public class Toy{
 	float acceleration;
 	float accelRate;
 	
-	private Shape prototype;
+	private Path2D prototype;
 	private Shape shape;
 	
 	private Fire fire;
@@ -34,13 +37,15 @@ public class Toy{
 	
 	private PullString string;
 	
+	private LinkedList<Person> passengers;	
 	
-	public Toy(int posX, int posY) {
+	public Boat(int posX, int posY) {
 		trajectory = new Vector(-1, 0);
 		acceleration = 0;
 		position = new Vector(posX, posY);
 		
 		prototype = generateProtoShape();
+		prototype.transform(AffineTransform.getScaleInstance(1.5, 1.5));
 		translateShape();
 		
 		string = new PullString();
@@ -48,6 +53,7 @@ public class Toy{
 		crashed = false;
 		
 		fire = new Fire();
+		passengers = new LinkedList<Person>();
 	}
 	
 	public void crash() {
@@ -61,7 +67,7 @@ public class Toy{
 		return bounds;
 	}
 	
-	protected Shape generateProtoShape() {
+	protected Path2D generateProtoShape() {
 		GeneralPath shape = new GeneralPath();
 		shape.moveTo(-10, -20);
 		shape.lineTo(10, -20);
@@ -89,26 +95,27 @@ public class Toy{
 	}
 
 	public void move() {
-		position = trajectory.add(position);
+		position = position.add(trajectory);
 		trajectory = trajectory.scale(FRICTION);
 		if (! string.isHeld()) {
 			string.trail(trajectory);
 		}
+		translateShape();
 	}
 		
-	public void pull(Vector handle) {
+	public void pull(Handle handle) {
 		Vector force = handle.subtract(position);		
 		double pull = string.pull(force);
 		
 		if (pull > 0) {
-			pull = Math.max(pull, 0);
-			pull = Math.min(pull, MAX_ACCELERATION);
+			pull = Math.max(0, Math.min(pull, MAX_ACCELERATION));
 			
 			Vector orientation = force.normalize();						
 			Vector change = orientation.scale(pull);
 			trajectory = trajectory.add(change); 
-			
-			translateShape();
+		}
+		if (! string.isHeld() && handle.contains(string.getEnd().add(position))) {
+			string.grab();
 		}
 	}
 	
@@ -130,11 +137,9 @@ public class Toy{
         
         g.setTransform(currentTrans);
         g.setStroke(before);
-               
-        string.draw(g, getBow(), position);
-        
+                      
         if (debug) {
-	        g.setColor(Color.green);
+	        g.setColor(Color.pink);
 	        g.setStroke(new BasicStroke(3));
 	        Vector localTrajectory = trajectory.scale(5).add(position);
 	        g.drawLine(position.intX(), position.intY(), localTrajectory.intX(), localTrajectory.intY());
@@ -142,12 +147,38 @@ public class Toy{
 	        g.draw(getBounds());
         }
         
-        if (crashed) {
+        if (! passengers.isEmpty()) { 
+	        int space = 30 / passengers.size();
+	        int offset = -15;
+	        for (int i=0; i<passengers.size(); i++) {
+	        	passengers.get(i).draw(g, position.add(new Vector(offset, -10)));
+	        	offset += space;
+	        }
+        }
+        
+        if (!crashed) {
+        	string.draw(g, getBow(), position);
+        }
+        else {
         	fire.draw(g, position, 10, shape);
         }
 	}
 	
 	public Vector getBow() {
 		return position.add(trajectory.normalize().scale(10));
+	}
+
+	public Shape getShape() {
+		return shape;
+	}
+
+	public boolean intersects(Person p) {
+		return getBounds().intersects(p.getBounds());
+	}
+
+	public void pickup(Person p) {
+		System.out.println("Picked up passenger");
+		passengers.add(p);
+		Collections.sort(passengers);
 	}
 }
