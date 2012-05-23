@@ -3,6 +3,7 @@ package net.adbenson.toybox;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics2D;
+import java.awt.Point;
 import java.awt.Stroke;
 import java.awt.geom.AffineTransform;
 
@@ -17,7 +18,7 @@ public class PullString {
 	
 	private Vector end;
 	
-	private Color color = Color.red;
+	private Color color = Color.green;
 	
 	private double width;
 	
@@ -73,16 +74,14 @@ public class PullString {
 
 	public void draw(Graphics2D g, Vector bow, Vector position) {
         Stroke oldStroke = g.getStroke();
-        AffineTransform oldTrans = g.getTransform();
 		        
 		g.setStroke(new BasicStroke((float) width));
 		g.setColor(color);
-		g.setTransform(AffineTransform.getTranslateInstance(position.x, position.y));
 		
-	    g.drawLine(bow.intX(), bow.intY(), end.intX(), end.intY());
+		Vector tempEnd = end.add(position);		
+	    g.drawLine(bow.intX(), bow.intY(), tempEnd.intX(), tempEnd.intY());
 	    
         g.setStroke(oldStroke);
-        g.setTransform(oldTrans);
 	}
 
 	public void setEnd(Vector end2) {
@@ -91,6 +90,10 @@ public class PullString {
 
 	public void trail(Vector trajectory) {
 		end = trajectory.normalize().invert().scale(PullString.LENGTH_MIN*2);
+	}
+
+	public Vector getEnd() {
+		return end;
 	}
 
 }
