@@ -1,3 +1,4 @@
+package net.adbenson.toybox;
 
 
 
@@ -9,7 +10,6 @@ import java.awt.geom.AffineTransform;
 import java.awt.geom.GeneralPath;
 import java.util.Random;
 
-import net.adbenson.toybox.Vector;
 
 
 public class Fire {

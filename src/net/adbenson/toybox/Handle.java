@@ -1,6 +1,6 @@
+package net.adbenson.toybox;
 
 
-import net.adbenson.toybox.Vector;
 
 public class Handle extends Vector{
 

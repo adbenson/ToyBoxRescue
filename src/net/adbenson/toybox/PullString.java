@@ -6,7 +6,7 @@ import java.awt.Graphics2D;
 import java.awt.Stroke;
 import java.awt.geom.AffineTransform;
 
-public class String {
+public class PullString {
 	
 	public static final int LENGTH_MIN = 30;
 	public static final int LENGTH_MAX = 300;
@@ -23,7 +23,7 @@ public class String {
 	
 	private boolean held;
 	
-	public String() {
+	public PullString() {
 		drop();
 		end = new Vector(0, 0);
 	}
@@ -90,7 +90,7 @@ public class String {
 	}
 
 	public void trail(Vector trajectory) {
-		end = trajectory.normalize().invert().scale(String.LENGTH_MIN*2);
+		end = trajectory.normalize().invert().scale(PullString.LENGTH_MIN*2);
 	}
 
 }
