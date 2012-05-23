@@ -21,7 +21,6 @@ import java.awt.image.BufferedImage;
 import javax.swing.JFrame;
 
 import net.adbenson.toybox.Handle;
-import net.adbenson.toybox.Toy;
 import net.adbenson.toybox.Vector;
 
 public class ToyBox {

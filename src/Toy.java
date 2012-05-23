@@ -1,4 +1,4 @@
-package net.adbenson.toybox;
+
 
 import java.awt.BasicStroke;
 import java.awt.Color;
@@ -8,6 +8,9 @@ import java.awt.Shape;
 import java.awt.Stroke;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.GeneralPath;
+
+import net.adbenson.toybox.String;
+import net.adbenson.toybox.Vector;
 
 public class Toy{
 		
