@@ -37,7 +37,7 @@ public class Handle extends Vector{
 		return new Rectangle(intX()-halfSize, intY()-halfSize, SIZE, SIZE);
 	}
 
-	public boolean contains(Shape shape) {
+	public boolean intersects(Shape shape) {
 		Rectangle shapeBounds = shape.getBounds();
 		if (! shapeBounds.intersects(this.getBounds())) {
 			System.out.println("Handle collision shortcut passed");
