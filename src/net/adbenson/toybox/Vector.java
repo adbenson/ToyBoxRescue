@@ -40,7 +40,7 @@ public class Vector extends Point2D.Double {
 		this.y = y;
 	}
 	
-	Vector scale(double delta) {
+	public Vector scale(double delta) {
 		return new Vector(x*delta, y*delta);
 	}
 	
@@ -48,7 +48,7 @@ public class Vector extends Point2D.Double {
 		return new Vector(this.x + position.x, this.y + position.y);
 	}
 	
-	Vector subtract(Vector vector) {
+	public Vector subtract(Vector vector) {
 		return new Vector(this.x - vector.x, this.y - vector.y);
 	}
 	
