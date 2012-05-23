@@ -17,11 +17,11 @@ public class Fire {
 	Vector outerBaseLeft = new Vector(-10, 0);
 	Vector outerBaseRight = new Vector(10, 0);
 	
-	BoundVector outerCP1Left = new BoundVector(-35, -25, -20, -10);
-	BoundVector outerCP2Left = new BoundVector(-10, -40, 0, -30);
-	BoundVector outerCPRight = new BoundVector(15, -25, 30, -15);
+	BoundVector outerCP1Left = new BoundVector(-25, -18, -15, -10);
+	BoundVector outerCP2Left = new BoundVector(-10, -30, 0, -22);
+	BoundVector outerCPRight = new BoundVector(15, -25, 25, -15);
 	
-	BoundVector outerPeak = new BoundVector(-10, -50, 0, -30);
+	BoundVector outerPeak = new BoundVector(-10, -40, 0, -30);
 	
 	Vector innerBaseLeft = new Vector(-5, 0);
 	Vector innerBaseRight = new Vector(5, 0);
@@ -40,7 +40,6 @@ public class Fire {
 		
 		outerPeak.randomize();
 		
-		System.out.println("FIRE");
 		Color bColor = g.getColor();
 		AffineTransform bTransform = g.getTransform();
 		
@@ -60,7 +59,7 @@ public class Fire {
 		
 		GeneralPath inner = new GeneralPath();
 		inner.moveTo(innerBaseLeft.x, innerBaseLeft.y);
-		inner.quadTo(innerCPLeft.x, innerCPRight.y, outerPeak.x, innerPeak.y);
+		inner.quadTo(innerCPLeft.x, innerCPRight.y, outerPeak.x+5, innerPeak.y);
 		inner.quadTo(innerCPRight.x, innerCPRight.y, innerBaseRight.x, innerBaseRight.y);
 		inner.closePath();
 		
