@@ -45,8 +45,6 @@ public class ToyRescue {
 	
 	private Painter painter;
 	
-	private Vector mousePos;
-	
 	private Boat toy;
 	
 	private Handle handle;
@@ -195,8 +193,6 @@ public class ToyRescue {
 	        	p.draw(g2);
 	        }
 	        
-	        new Person(Color.green, handle, 0.3).draw(g2);
-	        
 	        g.drawImage(offscreen, 0, 0, this);
 		}
 
@@ -215,7 +211,7 @@ public class ToyRescue {
 			Rectangle toyBounds = toy.getBounds();
 			
 			boolean wallCrash = ! window.getWall().contains(toyBounds);
-			boolean handleCrash = false;//handle.contains(toy.getShape());
+			boolean handleCrash = handle.intersects(toy.getShape());
 			if (wallCrash || handleCrash) { 
 				System.out.println("Crash: wall?"+wallCrash+" handle?"+handleCrash);
 				toy.crash();
