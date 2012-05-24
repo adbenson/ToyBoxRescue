@@ -9,6 +9,7 @@ import java.awt.Rectangle;
 import java.awt.Shape;
 import java.awt.Stroke;
 import java.awt.geom.AffineTransform;
+import java.awt.geom.Area;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.Path2D;
 import java.util.Collections;
@@ -27,7 +28,7 @@ public class Boat{
 	float accelRate;
 	
 	private Path2D prototype;
-	private Shape shape;
+	private Area shape;
 	
 	private Fire fire;
 	
@@ -123,7 +124,7 @@ public class Boat{
 		AffineTransform tx = new AffineTransform();
 		tx.translate(position.x, position.y);
 		tx.rotate(trajectory.getAngle());
-		shape = tx.createTransformedShape(prototype);
+		shape = new Area(tx.createTransformedShape(prototype));
 	}
 	
 	public void draw(Graphics2D g) {
@@ -173,7 +174,20 @@ public class Boat{
 	}
 
 	public boolean intersects(Person p) {
-		return getBounds().intersects(p.getBounds());
+		Rectangle personBounds = p.getBounds();
+		//Coarse test
+		if (! getBounds().intersects(p.getBounds())) {
+			return false;
+		}
+		
+		//Fine test
+		if (shape.intersects(personBounds)) {
+			return true;
+		}
+		else {
+			return false;
+		}
+		
 	}
 
 	public void pickup(Person p) {
