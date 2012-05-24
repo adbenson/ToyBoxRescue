@@ -40,7 +40,6 @@ public class Handle extends Vector{
 	public boolean intersects(Shape shape) {
 		Rectangle shapeBounds = shape.getBounds();
 		if (! shapeBounds.intersects(this.getBounds())) {
-			System.out.println("Handle collision shortcut passed");
 			return false;
 		}
 		
