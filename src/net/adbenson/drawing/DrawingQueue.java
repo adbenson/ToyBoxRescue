@@ -5,6 +5,7 @@ import java.util.Comparator;
 import java.util.PriorityQueue;
 
 import net.adbenson.drawing.Drawable.Compare;
+import net.adbenson.toybox.PullString;
 
 public class DrawingQueue {
 	
@@ -32,5 +33,9 @@ public class DrawingQueue {
 			Drawable d = q.poll();
 			d.triggerDraw(g);
 		}
+	}
+
+	public void enqueue(DrawingQueueable de) {
+		de.enqueueForDraw(this);
 	}
 }
