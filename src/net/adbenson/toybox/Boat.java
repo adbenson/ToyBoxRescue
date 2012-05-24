@@ -15,12 +15,18 @@ import java.awt.geom.Path2D;
 import java.util.Collections;
 import java.util.LinkedList;
 
+import net.adbenson.drawing.Drawable;
+import net.adbenson.drawing.DrawingQueueable;
+import net.adbenson.drawing.DrawingQueue;
 
-public class Boat{
+
+public class Boat implements DrawingQueueable{
 		
 	private static final double FRICTION = 0.95;
 	private static final double TURN_RADIUS = 0.5;
 	private static final double MAX_ACCELERATION = 2.0;
+	private static final int PASSENGER_SPACE = 30;
+	private static final int PASSENGER_VERTICAL_OFFSET = -10;
 
 	Vector position;
 	Vector trajectory;
@@ -87,10 +93,6 @@ public class Boat{
 		return string.isHeld();
 	}
 	
-	public void grabString() {
-		string.grab();
-	}
-	
 	public Vector getPosition() {
 		return position;
 	}
@@ -98,15 +100,35 @@ public class Boat{
 	public void move() {
 		position = position.add(trajectory);
 		trajectory = trajectory.scale(FRICTION);
+				
+		translateShape();
+		
+        if (! passengers.isEmpty()) { 
+	        int space = PASSENGER_SPACE / passengers.size();
+	        int offset = -(PASSENGER_SPACE / 2);
+	        
+	        for (Person p : passengers) {
+	        	p.setLocation(position.add(new Vector(offset, PASSENGER_VERTICAL_OFFSET)));
+	        	offset += space;
+	        }
+        }
+        
 		if (! string.isHeld()) {
 			string.trail(trajectory);
 		}
-		translateShape();
+        
+        if (!crashed) {
+    		string.setStart(getBow());
+        }
+        else {
+        	fire.setPosition(position);
+        }
 	}
 		
 	public void pull(Handle handle) {
 		Vector force = handle.subtract(position);		
 		double pull = string.pull(force);
+		string.setEnd(handle);
 		
 		if (pull > 0) {
 			pull = Math.max(0, Math.min(pull, MAX_ACCELERATION));
@@ -115,7 +137,8 @@ public class Boat{
 			Vector change = orientation.scale(pull);
 			trajectory = trajectory.add(change); 
 		}
-		if (! string.isHeld() && handle.contains(string.getEnd().add(position))) {
+		
+		if (! string.isHeld() && handle.contains(string.getEnd())) {
 			string.grab();
 		}
 	}
@@ -127,42 +150,38 @@ public class Boat{
 		shape = new Area(tx.createTransformedShape(prototype));
 	}
 	
-	public void draw(Graphics2D g) {
-		AffineTransform currentTrans = g.getTransform();
+	public void enqueueForDraw(DrawingQueue queue) {
+		if (!crashed) {
+			queue.enqueue(string);
+		}
+		else {
+			queue.enqueue(fire);
+		}
 		
-		Stroke before = g.getStroke();
-		
-		g.setStroke(new BasicStroke(1));
-        g.setColor(Color.black);
-        g.fill(shape);
-        
-        g.setTransform(currentTrans);
-        g.setStroke(before);
-                      
-        if (debug) {
-	        g.setColor(Color.pink);
-	        g.setStroke(new BasicStroke(3));
-	        Vector localTrajectory = trajectory.scale(5).add(position);
-	        g.drawLine(position.intX(), position.intY(), localTrajectory.intX(), localTrajectory.intY());
-	        
-	        g.draw(getBounds());
-        }
-        
-        if (! passengers.isEmpty()) { 
-	        int space = 30 / passengers.size();
-	        int offset = -15;
-	        for (int i=0; i<passengers.size(); i++) {
-	        	passengers.get(i).draw(g, position.add(new Vector(offset, -10)));
-	        	offset += space;
-	        }
-        }
-        
-        if (!crashed) {
-        	string.draw(g, getBow(), position);
-        }
-        else {
-        	fire.draw(g, position, 10, shape);
-        }
+		queue.enqueue(new Drawable(5) {
+			@Override
+			public void draw(Graphics2D g) {
+				AffineTransform currentTrans = g.getTransform();
+				
+				Stroke before = g.getStroke();
+				
+				g.setStroke(new BasicStroke(1));
+		        g.setColor(Color.black);
+		        g.fill(shape);
+		        
+		        g.setTransform(currentTrans);
+		        g.setStroke(before);
+		                      
+		        if (debug) {
+			        g.setColor(Color.pink);
+			        g.setStroke(new BasicStroke(3));
+			        Vector localTrajectory = trajectory.scale(5).add(position);
+			        g.drawLine(position.intX(), position.intY(), localTrajectory.intX(), localTrajectory.intY());
+			        
+			        g.draw(getBounds());
+		        }
+			}
+		});
 	}
 	
 	public Vector getBow() {
