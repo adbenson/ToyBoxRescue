@@ -160,17 +160,9 @@ public class Boat implements DrawingQueueable{
 		
 		queue.enqueue(new Drawable(5) {
 			@Override
-			public void draw(Graphics2D g) {
-				AffineTransform currentTrans = g.getTransform();
-				
-				Stroke before = g.getStroke();
-				
-				g.setStroke(new BasicStroke(1));
+			public void draw(Graphics2D g) {		
 		        g.setColor(Color.black);
 		        g.fill(shape);
-		        
-		        g.setTransform(currentTrans);
-		        g.setStroke(before);
 		                      
 		        if (debug) {
 			        g.setColor(Color.pink);
