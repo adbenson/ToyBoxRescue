@@ -1,36 +1,34 @@
 package net.adbenson.drawing;
 
 import java.awt.Graphics2D;
+import java.util.Collections;
 import java.util.Comparator;
+import java.util.LinkedList;
 import java.util.PriorityQueue;
-
-import net.adbenson.drawing.Drawable.Compare;
-import net.adbenson.toybox.PullString;
 
 public class DrawingQueue {
 	
-	private static int initialCapacity = 1;
 	private static Comparator<Drawable> comparator;
 	
-	private PriorityQueue<Drawable> q;
+	private LinkedList<Drawable> list;
 	
 	public DrawingQueue() {
 		if (comparator == null) {
 			comparator = new Drawable.Compare();
 		}
 		
-		q = new PriorityQueue<Drawable>(initialCapacity, comparator);
+		list = new LinkedList<Drawable>();
 	}
 	
 	public void enqueue(Drawable d) {
-		q.add(d);
+		list.add(d);
 	}
 	
 	public void draw(Graphics2D g) {
-		initialCapacity = q.size();
+		Collections.sort(list, comparator);
 		
-		while(! q.isEmpty()) {
-			Drawable d = q.poll();
+		while(! list.isEmpty()) {
+			Drawable d = list.poll();
 			d.triggerDraw(g);
 		}
 	}
