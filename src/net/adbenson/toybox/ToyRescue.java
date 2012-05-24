@@ -187,11 +187,13 @@ public class ToyRescue {
 
 	        toy.draw(g2);
 	       
-	        handle.draw(g2);
+
 	        
 	        for(Person p : floating) {
 	        	p.draw(g2);
 	        }
+	        
+	        handle.draw(g2);
 	        
 	        g.drawImage(offscreen, 0, 0, this);
 		}
@@ -199,7 +201,7 @@ public class ToyRescue {
 	}
 		
 	protected void tick() {
-		if (state == DROPPED || state == GRABBED) {
+		if (state == GRABBED || state == DROPPED) {
 			toy.pull(handle);
 			toy.move();
 			detectCollisions();
