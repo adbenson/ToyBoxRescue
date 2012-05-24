@@ -7,7 +7,11 @@ import java.awt.Point;
 import java.awt.Stroke;
 import java.awt.geom.AffineTransform;
 
-public class PullString {
+import net.adbenson.drawing.Drawable;
+import net.adbenson.drawing.DrawingQueueable;
+import net.adbenson.drawing.DrawingQueue;
+
+public class PullString implements DrawingQueueable {
 	
 	public static final int LENGTH_MIN = 30;
 	public static final int LENGTH_MAX = 300;
@@ -17,6 +21,7 @@ public class PullString {
 	private static final double ELASTICITY = 0.01;
 	
 	private Vector end;
+	private Vector start;
 	
 	private Color color = Color.green;
 	
@@ -26,6 +31,7 @@ public class PullString {
 	
 	public PullString() {
 		drop();
+		start = new Vector(0, 0);
 		end = new Vector(0, 0);
 	}
 	
@@ -52,7 +58,6 @@ public class PullString {
 		setWidth(distance);
 		
 		if (held) {
-			end = force;
 			return (distance - LENGTH_MIN) * ELASTICITY;
 		}
 		else {
@@ -71,21 +76,13 @@ public class PullString {
 			width = BASE_WIDTH;
 		}
 	}
-
-	public void draw(Graphics2D g, Vector bow, Vector position) {
-        Stroke oldStroke = g.getStroke();
-		        
-		g.setStroke(new BasicStroke((float) width));
-		g.setColor(color);
-		
-		Vector tempEnd = end.add(position);		
-	    g.drawLine(bow.intX(), bow.intY(), tempEnd.intX(), tempEnd.intY());
-	    
-        g.setStroke(oldStroke);
+	
+	public void setStart(Vector start) {
+		this.start = start;
 	}
-
-	public void setEnd(Vector end2) {
-		this.end = end2;		
+	
+	public void setEnd(Vector end) {
+		this.end = end;		
 	}
 
 	public void trail(Vector trajectory) {
@@ -94,6 +91,19 @@ public class PullString {
 
 	public Vector getEnd() {
 		return end;
+	}
+
+	@Override
+	public void enqueueForDraw(DrawingQueue queue) {
+		queue.enqueue(new Drawable(10) {
+			@Override
+			public void draw(Graphics2D g) {
+				g.setStroke(new BasicStroke((float) width));
+				g.setColor(color);
+			    g.drawLine(start.intX(), start.intY(), end.intX(), end.intY());
+			}
+			
+		});
 	}
 
 }
